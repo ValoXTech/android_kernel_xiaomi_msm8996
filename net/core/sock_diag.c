@@ -232,6 +232,18 @@ static struct pernet_operations diag_net_ops = {
 	.exit = diag_net_exit,
 };
 
+int sock_diag_destroy(struct sock *sk, int err)
+{
+	if (!capable(CAP_NET_ADMIN))
+		return -EPERM;
+
+	if (!sk->sk_prot->diag_destroy)
+		return -EOPNOTSUPP;
+
+	return sk->sk_prot->diag_destroy(sk, err);
+}
+EXPORT_SYMBOL_GPL(sock_diag_destroy);
+
 static int __init sock_diag_init(void)
 {
 	return register_pernet_subsys(&diag_net_ops);
